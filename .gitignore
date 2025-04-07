@@ -4,3 +4,5 @@ __pycache__/
 *.db
 *.pdf
 *.csv
+.DS_Store
+*.save
