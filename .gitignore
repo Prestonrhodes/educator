@@ -1,0 +1,6 @@
+educator_env/
+*.pyc
+__pycache__/
+*.db
+*.pdf
+*.csv

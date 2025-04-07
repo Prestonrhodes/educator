@@ -1,0 +1,33 @@
+        self.game = game
+        self.system_prompt = f"Teach {self.topic} interactively. Provide clear, concise lessons, tasks, and quizzes. Adapt to the user's pace and style."
+        self.lesson_num = 1
+
+    def start_lesson(self):
+        self.next_lesson()
+
+    def next_lesson(self):
+        rprint(Panel(f"Lesson {self.lesson_num}: {self.topic} - Part {self.lesson_num}", title="Lesson", style="cyan"))
+        lesson_text = self.llm.generate(f"Give a concise lesson on {self.topic} for part {self.lesson_num}.", self.system_prompt, stream=False)
+        rprint(Panel(lesson_text, title="Lesson Content", style="blue"))
+        self.game.award_points(5)
+        rprint(f"[bold cyan]Progress: [{'=' * (self.lesson_num - 1)}{' ' * (10 - self.lesson_num)}] {self.lesson_num}/10[/bold cyan]")
+        rprint("[bold cyan]What’s next? 'next' (lesson), 'quiz' (test), 'ask' (question), 'quit' (exit)[/bold cyan]")
+        self.lesson_num += 1
+
+    def take_quiz(self):
+        quiz = self.llm.generate(f"Ask a quiz question about {self.topic} based on lesson {self.lesson_num - 1}.", self.system_prompt, stream=False)
+        rprint(Panel(quiz, title="Quiz", style="yellow"))
+        user_input = prompt("Your answer: ")
+        answer = self.llm.generate(f"Is '{user_input}' correct for the quiz?", self.system_prompt, stream=False)
+        rprint(Panel(answer, title="Answer Check", style="green"))
+        if "yes" in answer.lower():
+            self.game.award_points(10)
+            rprint("[bold green]Nailed it! +10 points![/bold green]")
+        else:
+            rprint("[yellow]Not quite—keep grinding![/yellow]")
+        rprint("[bold cyan]What’s next? 'next' (lesson), 'quiz' (test), 'ask' (question), 'quit' (exit)[/bold cyan]")
+
+    def handle_question(self, question):
+        response = self.llm.generate(f"User asked: '{question}'. Answer it and tie it to {self.topic}.", self.system_prompt, stream=False)
+        rprint(Panel(response, title="AI Response", style="green"))
+        rprint("[bold cyan]What’s next? 'next' (lesson), 'quiz' (test), 'ask' (question), 'quit' (exit)[/bold cyan]")
